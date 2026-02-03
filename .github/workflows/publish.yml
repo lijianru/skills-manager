@@ -25,6 +25,8 @@ jobs:
 
       - run: pnpm install
       - run: pnpm run build
-      - run: pnpm publish --no-git-checks
+      - run: |
+          echo "@lijianru:registry=https://npm.pkg.github.com" > .npmrc
+          pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
