@@ -1,17 +1,30 @@
 {
   "name": "skills-manager",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
+  "description": "The ultimate CLI for managing and syncing AI coding skills (Cursor Rules, Prompts) across multiple IDEs like Cursor, Windsurf, Copilot, and more.",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "start": "node bin/skills-manager.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node bin/skills-manager.js"
   },
-  "keywords": [],
+  "keywords": [
+    "ai",
+    "cli",
+    "skills",
+    "skills-manager",
+    "cursor",
+    "cursor-rules",
+    "windsurf",
+    "copilot",
+    "antigravity",
+    "prompts",
+    "developer-tools",
+    "automation",
+    "productivity"
+  ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "skills-manager": "./bin/skills-manager.js",
@@ -26,6 +39,7 @@
     "fs-extra": "^11.3.3",
     "highlight.js": "^11.11.1",
     "inquirer": "^9.3.8",
+    "open": "^11.0.0",
     "ora": "^9.1.0",
     "os-homedir": "^2.0.0"
   },

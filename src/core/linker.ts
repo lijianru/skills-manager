@@ -7,35 +7,27 @@ export class Linker {
    * @param source The actual file/folder to point to.
    * @param target The location where the link will be created.
    */
-  async createLink(source: string, target: string): Promise<void> {
+  /**
+   * Copies the skill source to the target location.
+   * @param source The actual file/folder to copy from.
+   * @param target The location where the skill will be installed.
+   */
+  async copySkill(source: string, target: string): Promise<void> {
     const parentDir = path.dirname(target);
     await fs.ensureDir(parentDir);
 
-    if (fs.existsSync(target)) {
-      throw new Error(`Target path ${target} already exists.`);
-    }
-
-    // creates a symlink at `target` pointing to `source`
-    await fs.ensureSymlink(source, target);
+    // Overwrite existing content
+    await fs.copy(source, target, { overwrite: true });
   }
 
-  async removeLink(target: string): Promise<void> {
-    // Check if path exists (lstat does not follow link)
+  async removeSkill(target: string): Promise<void> {
+    // Safely remove the target directory/file
     try {
-      const stats = await fs.lstat(target);
-      if (stats.isSymbolicLink()) {
-        await fs.unlink(target);
-      } else {
-        // It exists but not a link?
-        // We should be careful.
-        throw new Error(`${target} exists but is not a symbolic link. Aborting removal to be safe.`);
+      if (fs.existsSync(target)) {
+        await fs.remove(target);
       }
     } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        // Doesn't exist, easier job
-        return;
-      }
-      throw e;
+      console.error(`Failed to remove ${target}: ${e.message}`);
     }
   }
 }

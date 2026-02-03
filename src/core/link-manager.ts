@@ -42,37 +42,44 @@ export class LinkManager {
     // But for "awesome-skills" repos, usually we want sub items.
     // Let's stick to subdirectories for now as requested.
 
+    // Prepare list of items to link (name -> sourceSubPath)
+    let itemsToLink: { name: string; subPath: string }[] = [];
+
     if (candidates.length === 0) {
-      console.log(chalk.yellow('No sub-skills found in this repository. Linking the entire repository instead.'));
-      // Fallback to linking whole repo
-      await this.linkItem(repoName, repoPath, '', repoName);
-      return;
+      console.log(chalk.yellow('No sub-skills found in this repository. Linking the entire repository.'));
+      // Link the root
+      itemsToLink.push({ name: repoName, subPath: '' });
+    } else {
+      const answers = await inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'selectedSkills',
+          message: 'Select skills to link (Space to select, Enter to confirm):',
+          choices: candidates,
+          pageSize: 15,
+        },
+      ]);
+
+      const { selectedSkills } = answers;
+
+      if (selectedSkills.length === 0) {
+        console.log('No skills selected.');
+        return;
+      }
+
+      itemsToLink = selectedSkills.map((s: string) => ({
+        name: s,
+        subPath: prefix + s,
+      }));
     }
 
-    const answers = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'selectedSkills',
-        message: 'Select skills to link (Space to select, Enter to confirm):',
-        choices: candidates,
-        pageSize: 15,
-      },
-    ]);
-
-    const { selectedSkills } = answers;
-
-    if (selectedSkills.length === 0) {
-      console.log('No skills selected.');
-      return;
-    }
-
-    // IDE Selection
+    // IDE Selection (Common for both flows)
     const { targetIDE } = await inquirer.prompt([
       {
         type: 'list',
         name: 'targetIDE',
         message: 'Select target IDE:',
-        choices: ['Cursor', 'Windsurf', 'Antigravity', 'Other (Custom)'],
+        choices: ['Cursor', 'Windsurf', 'Antigravity', 'Open Code', 'Claude', 'GitHub Copilot', 'Kiro', 'Codex', 'Other (Custom)'],
         default: 0,
       },
     ]);
@@ -105,6 +112,21 @@ export class LinkManager {
           case 'Antigravity':
             targetParentDir = path.join(home, '.gemini', 'antigravity', 'skills');
             break;
+          case 'Open Code':
+            targetParentDir = path.join(home, '.config', 'opencode', 'skills');
+            break;
+          case 'Claude':
+            targetParentDir = path.join(home, '.claude', 'skills');
+            break;
+          case 'GitHub Copilot':
+            targetParentDir = path.join(home, '.copilot', 'skills');
+            break;
+          case 'Kiro':
+            targetParentDir = path.join(home, '.kiro', 'skills');
+            break;
+          case 'Codex':
+            targetParentDir = path.join(home, '.codex', 'skills');
+            break;
         }
         console.log(chalk.blue(`Target (Global): ${targetParentDir}`));
       } else {
@@ -113,11 +135,11 @@ export class LinkManager {
           {
             type: 'input',
             name: 'path',
-            message: 'Enter absolute target project directory (e.g., /Users/username/my-project/):',
-            default: process.cwd(),
+            message: 'Enter target project directory (Press Enter for current):',
           },
         ]);
-        targetParentDir = path.resolve(res.path.trim());
+        const inputPath = res.path.trim();
+        targetParentDir = inputPath ? path.resolve(inputPath) : process.cwd();
 
         // Append IDE-specific local config path
         switch (targetIDE) {
@@ -129,6 +151,21 @@ export class LinkManager {
             break;
           case 'Antigravity':
             targetParentDir = path.join(targetParentDir, '.agent', 'skills');
+            break;
+          case 'Open Code':
+            targetParentDir = path.join(targetParentDir, '.opencode', 'skills');
+            break;
+          case 'Claude':
+            targetParentDir = path.join(targetParentDir, '.claude', 'skills');
+            break;
+          case 'GitHub Copilot':
+            targetParentDir = path.join(targetParentDir, '.github', 'skills');
+            break;
+          case 'Kiro':
+            targetParentDir = path.join(targetParentDir, '.kiro', 'skills');
+            break;
+          case 'Codex':
+            targetParentDir = path.join(targetParentDir, '.codex', 'skills');
             break;
         }
         console.log(chalk.blue(`Target (Project): ${targetParentDir}`));
@@ -163,10 +200,12 @@ export class LinkManager {
       }
     }
 
-    for (const skillName of selectedSkills) {
-      const sourceSubPath = prefix + skillName;
-      const sourcePath = path.join(repoPath, sourceSubPath);
-      await this.linkItem(repoName, sourcePath, sourceSubPath, skillName, targetParentDir);
+    // Perform Links / Copies
+    for (const item of itemsToLink) {
+      const sourcePath = path.join(repoPath, item.subPath);
+      // Link name: if root (subPath empty), use repoName. Else use subdir name.
+      const linkName = item.name;
+      await this.linkItem(repoName, sourcePath, item.subPath, linkName, targetParentDir);
     }
   }
 
@@ -186,11 +225,11 @@ export class LinkManager {
     }
 
     const targetPath = path.join(targetDir!, linkName);
-    const spinner = ora(`Linking ${linkName}...`).start();
+    const spinner = ora(`Installing ${linkName}...`).start();
 
     try {
-      await linker.createLink(sourcePath, targetPath);
-      spinner.succeed(`Linked ${linkName} -> ${targetPath}`);
+      await linker.copySkill(sourcePath, targetPath);
+      spinner.succeed(`Installed ${linkName} -> ${targetPath}`);
 
       // Update config
       const currentConfig = configManager.getSkill(repoName);
@@ -198,14 +237,19 @@ export class LinkManager {
         const newLink = { targetPath, sourceSubPath };
         // Avoid duplicates
         const links = currentConfig.links || [];
-        if (!links.some((l) => l.targetPath === targetPath)) {
+        // Check if targetPath already exists in links
+        const existingIdx = links.findIndex((l) => l.targetPath === targetPath);
+        if (existingIdx === -1) {
           links.push(newLink);
-          currentConfig.links = links;
-          configManager.updateSkill(repoName, currentConfig);
+        } else {
+          // Update existing entry if needed? Usually just skip add
+          links[existingIdx] = newLink;
         }
+        currentConfig.links = links;
+        configManager.updateSkill(repoName, currentConfig);
       }
     } catch (e: any) {
-      spinner.fail(`Failed to link ${linkName}: ${e.message}`);
+      spinner.fail(`Failed to install ${linkName}: ${e.message}`);
     }
   }
 }

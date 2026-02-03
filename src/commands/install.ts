@@ -9,6 +9,7 @@ import { linker } from '../core/linker.js';
 import { linkManager } from '../core/link-manager.js';
 
 export const installCommand = new Command('install')
+  .alias('i')
   .argument('<url>', 'Git repository URL of the skill')
   .argument('[name]', 'Name of the skill (defaults to repo name)')
   .description('Install a new skill from a git repository')

@@ -17,10 +17,11 @@ import { linkCommand } from './commands/link.js';
 import { listCommand } from './commands/list.js';
 import { removeCommand } from './commands/remove.js';
 import { updateCommand } from './commands/update.js';
+import { createCommand } from './commands/create.js';
 
 const program = new Command();
 
-program.name('skills-manager').description('CLI to manage coding assistant skills').version(packageJsonParams.version);
+program.name('skills-manager').description('CLI tool to manage coding assistant skills').version('0.0.1');
 
 program.addCommand(configCommand);
 program.addCommand(installCommand);
@@ -28,5 +29,6 @@ program.addCommand(linkCommand);
 program.addCommand(listCommand);
 program.addCommand(removeCommand);
 program.addCommand(updateCommand);
+program.addCommand(createCommand);
 
 program.parse(process.argv);

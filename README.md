@@ -1,147 +1,120 @@
 # Skills Manager CLI
 
-[English](#english) | [中文](#chinese)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-<a name="english"></a>
+[English](README.md) | [中文](README_zh-CN.md)
 
-## 🇬🇧 English
+**Skills Manager** is a CLI tool designed to manage and distribute coding assistant "skills" (configurations, rules, prompts) from GitHub to your local IDEs.
 
-**Skills Manager** is a CLI tool designed for developers to manage coding assistant "skills" (configurations, rules, prompts stored in Git repositories). It simplifies the process of installing, updating, and linking these skills to your local projects or IDE configuration folders.
+## 💡 Motivation
 
-### Features
+Developers often source high-quality Cursor Rules or AI Prompts from GitHub repositories. However, manually cloning, updating, and linking these files to various IDEs (Cursor, Windsurf, Antigravity) is tedious and error-prone.
 
-*   **Install**: Clone skills from remote Git repositories.
-*   **Selective Linking**: Interactively select which specific sub-skills (folders) to link.
-*   **IDE Integration**: Built-in presets for **Cursor**, **Windsurf**, and **Antigravity** to automatically detect global rule directories.
-*   **Link**: Add links to skills from already installed repositories at any time.
-*   **Update**: Keep your skills up-to-date with a single command.
-*   **Manage**: List installed skills and remove them when no longer needed.
-*   **Centralized Storage**: All skills are stored in `~/.skills-manager/skills`.
+**Skills Manager** streamlines this workflow. It acts as a package manager for your AI skills:
+1.  **Centralized Hub**: Stores all skills in one place (`~/.skills-manager/skills`).
+2.  **IDE Ready**: Distributes skills to Cursor, Windsurf, or Antigravity with zero friction.
+3.  **Always Up-to-Date**: Syncs remote changes to all your local installed copies with a single command.
 
-### Installation
+## ✨ Features
 
-```bash
-# Install dependencies
-pnpm install
+*   **⚡️ Install**: Clone skills from any remote Git repository.
+*   **🎯 Selective**: Interactively select specific sub-directories to install (e.g., just the `python` rules from a massive mono-repo).
+*   **🔄 Sync Strategy**: Uses **file copying** instead of symlinks to ensure 100% compatibility with all IDEs.
+*   **🛠️ IDE Integrations**: Built-in path detection for:
+    *   **Cursor**
+    *   **Windsurf**
+    *   **Antigravity**
+    *   **Open Code**
+    *   **Claude**
+    *   **GitHub Copilot**
+    *   **Kiro**
+    *   **Codex**
+*   **📦 Auto-Update**: Run `skm update` to pull changes and automatically overwrite/sync all installed copies.
 
-# Build the project
-pnpm run build
+## 🚀 Quick Start
 
-# Link globally (optional)
-npm link
-```
-
-### Usage
-
-#### Install a Skill
-Download a skill and interactively link selected sub-skills.
-```bash
-skills-manager install <git-url> [name]
-# Example
-skills-manager install https://github.com/user/awesome-cursor-rules.git
-```
-*   **Interactive Flow**:
-    1.  Select skills to link.
-    2.  Select target IDE (or Custom).
-    3.  Choose Global Install (auto-path) or Project Install.
-
-#### Link Existing Skills
-Link specific skills from a repository you have already installed.
-```bash
-skills-manager link [repo-name]
-```
-
-#### List Installed Skills
-View all skills and their current links.
-```bash
-skills-manager list
-```
-
-#### Update Skills
-Pull the latest changes from the remote repository.
-```bash
-# Update all skills
-skills-manager update
-
-# Update a specific skill
-skills-manager update my-skill
-```
-
-#### Remove a Skill
-Delete the skill and its symlinks.
-```bash
-skills-manager remove my-skill
-```
-
----
-
-<a name="chinese"></a>
-
-## 🇨🇳 中文
-
-**Skills Manager** 是一个专为开发者设计的 CLI 工具，用于通过 Git 仓库管理 AI 编程助手的“技能”（配置、规则、Prompts 等）。它简化了技能的安装、更新以及链接到本地项目或 IDE 配置目录的过程。
-
-### 功能特性
-
-*   **安装 (Install)**: 从远程 Git 仓库克隆技能。
-*   **按需链接 (Selective Linking)**: 支持交互式选择仅链接仓库中的特定子目录。
-*   **IDE 集成**: 内置 **Cursor**, **Windsurf**, **Antigravity** 预设，支持自动检测其全局规则目录。
-*   **链接 (Link)**: 随时从已安装的仓库中追加链接其他技能。
-*   **更新 (Update)**: 一键更新所有已安装的技能。
-*   **管理 (Manage)**: 查看已安装的技能列表，或移除不再需要的技能。
-*   **集中存储**: 所有技能统一存储在 `~/.skills-manager/skills` 目录下。
-
-### 安装说明
+### 1. Installation
 
 ```bash
-# 安装依赖
-pnpm install
-
-# 构建项目
-pnpm run build
-
-# 全局软链 (可选)
-npm link
+npm install -g skills-manager
+# You can now use the 'skm' alias
+skm --help
 ```
 
-### 使用指南
+### 2. Usage Example
 
-#### 安装技能
-下载一个技能并交互式选择需要链接的子目录。
+**Goal**: Install `awesome-cursor-rules` and apply the `python` rules to your global Cursor configuration.
+
 ```bash
-skills-manager install <git-url> [名称]
-# 示例
-skills-manager install https://github.com/user/awesome-cursor-rules.git
+skm install https://github.com/patrickjmcd/awesome-cursor-rules.git
 ```
-*   **交互流程**:
-    1.  选择需要链接的 Skills。
-    2.  选择目标 IDE (如 Cursor)。
-    3.  选择全局安装 (自动路径) 或 项目安装。
 
-#### 链接已安装的技能
-从已安装的仓库中选择并链接更多技能。
+**Interactive Flow**:
+1.  **Clone**: The tool downloads the repo.
+2.  **Select**: You check `rules/python` from the list.
+3.  **Target**: You select **Cursor**.
+4.  **Mode**: You select **Global Install**.
+
+The tool automatically copies the files to `~/.cursor/rules/python`.
+
+## 📖 Command Reference
+
+### Create a Local Skill
+Scaffold a new local skill in the `my-local-skills` collection.
+Great for creating your own personal skills library.
+
 ```bash
-skills-manager link [仓库名称]
+skm create <name>
 ```
 
-#### 查看已安装技能
-列出所有管理中的技能及其链接状态。
+### Install & Distribute
+
+Download a repo and interactively choose what to install and where.
+
 ```bash
-skills-manager list
+skm install <git-url> [reference-name]
 ```
 
-#### 更新技能
-从远程仓库拉取最新代码。
+### Link / Distribute Existing
+
+Add more skills from a repository you've already installed.
+
 ```bash
-# 更新所有技能
-skills-manager update
-
-# 更新指定技能
-skills-manager update my-skill
+skm link [repo-name]
+# If run with no args, prompts to select a repo
+skm link
 ```
 
-#### 移除技能
-删除技能文件及其对应的软链接。
+*Supports Custom Project paths: Select a project root, and `skm` will append the correct IDE folder (e.g., `.cursor/skills`).*
+
+### List
+
+View installed repositories and where their skills are distributed.
+
 ```bash
-skills-manager remove my-skill
+skm list
 ```
+
+### Update
+
+Pull the latest changes from Git and **overwrite** all local copies to keep them in sync.
+
+```bash
+# Update everything
+skm update
+
+# Update specific repo
+skm update my-skills
+```
+
+### Remove
+
+Delete a repository and all its distributed copies.
+
+```bash
+skm remove my-skills
+```
+
+## 📄 License
+
+[MIT](LICENSE)
