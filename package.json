@@ -1,5 +1,5 @@
 {
-  "name": "@lijianru/skills-manager",
+  "name": "@lijianru888/skills-manager",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/lijianru/skills-manager.git"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The ultimate CLI for managing and syncing AI coding skills (Cursor Rules, Prompts) across multiple IDEs like Cursor, Windsurf, Copilot, and more.",
   "main": "index.js",
   "scripts": {
